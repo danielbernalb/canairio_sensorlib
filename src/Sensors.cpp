@@ -182,11 +182,11 @@ int Sensors::getPmDeviceTypeSelected(){
  */
 bool Sensors::pmGenericRead() {
     String txtMsg = hwSerialRead();
-    if (txtMsg[0] == 66) {
-        if (txtMsg[1] == 77) {
-            DEBUG("-->[HPMA] read > done!");
-            pm25 = txtMsg[6] * 256 + byte(txtMsg[7]);
-            pm10 = txtMsg[8] * 256 + byte(txtMsg[9]);
+    if (txtMsg[0] == 170) {
+        if (txtMsg[1] == 192) {
+            DEBUG("-->[SDS011] read > done!");
+            pm25 = (txtMsg[3] * 256 + byte(txtMsg[2]))/10;
+            pm10 = (txtMsg[5] * 256 + byte(txtMsg[4]))/10;
             if (pm25 > 1000 && pm10 > 1000) {
                 onPmSensorError("-->[E][PMSENSOR] out of range pm25 > 1000");
             }
@@ -230,7 +230,8 @@ bool Sensors::pmPanasonicRead() {
 String Sensors::hwSerialRead() {
     int try_sensor_read = 0;
     String txtMsg = "";
-    while (txtMsg.length() < 32 && try_sensor_read++ < SENSOR_RETRY) {
+    while (txtMsg.length() < 10 && try_sensor_read++ < SENSOR_RETRY) {
+
         while (_serial->available() > 0) {
             char inChar = _serial->read();
             txtMsg += inChar;
