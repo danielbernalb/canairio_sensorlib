@@ -297,35 +297,6 @@ bool Sensors:: CO2Mhz19Read() {
     return false;
 }
 
-bool Sensors:: CO2CM1106Read() {
-  CO2 = CO2CM1106val();
-  Serial.print("CO2 ppm: ");
-  Serial.println(CO2);
-    if(CO2>0){
-        DEBUG("-->[CM1106] read > done!");
-        return true;
-    }
-    return false;
-}
-
-int Sensors:: CO2CM1106val() {
-  static byte cmd[4] = {0x11, 0x01, 0x01, 0xED}; // Commands 0x01 Read ppm, 0x10 open/close ABC, 0x03 Calibrate 
-  static byte response[8] = {0};                 // response 0x16, 0x05, 0x01, DF1, DF2, DF3, DF4, CRC.  ppm=DF1*256+DF2
-  co2cm1106.write(cmd, 4);
-  co2cm1106.readBytes(response, 8);
-  int crc = 0;
-  for (int i = 0; i < 7; i++) crc += response[i];
-  crc = 256 - crc%256;
-  if (((int) response[0] == 0x16) && ((int)response[7] == crc)) {
-    unsigned int responseHigh = (unsigned int) response[3];
-    unsigned int responseLow = (unsigned int) response[4];
-    return (256 * responseHigh) + responseLow;
-  } else {
-    while(co2cm1106.available() > 0)  char t = co2cm1106.read();  // Clear serial input buffer;
-    return -1; 
-  }
-}
-
 /**
  * @brief read sensor data. Sensor selected.
  * @return true if data is loaded from sensor
@@ -348,9 +319,7 @@ bool Sensors::pmSensorRead() {
             return CO2Mhz19Read();
             break;
 
-        case CM1106:
-            return CO2CM1106Read();
-            break;
+
 
         default:
             return false;
@@ -466,11 +435,7 @@ bool Sensors::sensorSerialInit(int pms_type, int pms_rx, int pms_tx) {
         if(!serialInit(pms_type, 115200, pms_rx, pms_tx))return false;
     }
     else if (pms_type == Mhz19) {
-        DEBUG("-->[CO2SENSOR] detecting Mhz19 sensor..");
-        if(!serialInit(pms_type, 9600, pms_rx, pms_tx))return false;
-    }
-    else if (pms_type == CM1106) {
-        DEBUG("-->[CO2SENSOR] detecting CM1106 sensor..");
+        DEBUG("-->[PMSENSOR] detecting Mhz19 sensor..");
         if(!serialInit(pms_type, 9600, pms_rx, pms_tx))return false;
     }
 
@@ -513,14 +478,6 @@ bool Sensors::pmSensorAutoDetect(int pms_type) {
             return true;
         }
     }
-
-    if (pms_type == CM1106) {
-        if (CO2CM1106Init()) {
-            device_selected = "CM1106";
-            device_type = CM1106;
-            return true;
-        }
-    }
     
     if (pms_type <= Panasonic) {
         if (pmGenericRead()) {
@@ -543,11 +500,6 @@ bool Sensors::pmSensorAutoDetect(int pms_type) {
 bool Sensors:: CO2Mhz19Init() {
     myMHZ19.begin(*_serial);                                // *Serial(Stream) refence must be passed to library begin(). 
     myMHZ19.autoCalibration();                              // Turn auto calibration ON (OFF autoCalibration(false))
-    return true;
-}
-
-bool Sensors:: CO2CM1106Init() {
-    co2cm1106.begin(9600);
     return true;
 }
 
