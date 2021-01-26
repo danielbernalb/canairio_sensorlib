@@ -597,8 +597,10 @@ bool Sensors::pmSensorAutoDetect(int pms_type) {
 
 bool Sensors::CO2Mhz19Init() {
     DEBUG("-->[MH-Z19] starting MH-Z14 or MH-Z19 sensor..");
-    mhz19.begin(*_serial);    // *Serial(Stream) refence must be passed to library begin().
-    mhz19.autoCalibration();  // Turn auto calibration ON (OFF autoCalibration(false))
+    mhz19.begin(*_serial);    // *Serial(Stream) refence must be passed to library begin()
+    mhz19.autoCalibration(false);  // Turn auto calibration OFF autoCalibration
+    mhz19.getABC() ? DEBUG("-->[MH-Z19] Autocalibration Status: ON") :  DEBUG("-->[MH-Z19] Autocalibration Status: OFF");  // now print it's status
+    delay(100);
     return true;
 }
 
