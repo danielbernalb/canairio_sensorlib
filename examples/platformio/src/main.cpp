@@ -62,7 +62,9 @@ void setup() {
     // sensors.init(sensors.Auto,mRX,mTX);                // Auto detection and custom RX, TX pines
     // sensors.init(sensors.Auto,PMS_RX,PMS_TX); // Auto detection, custom RX,TX and custom DHT config
     //sensors.init(sensors.Auto,13,18);                  // TTGO_TQ board
-    sensors.init(Auto); 
+    //sensors.init(sensors.CM1106,13,18);
+    sensors.init(sensors.Auto);
+
 
     if(sensors.isPmSensorConfigured())
         Serial.println("-->[SETUP] Sensor configured: " + sensors.getPmDeviceSelected());
